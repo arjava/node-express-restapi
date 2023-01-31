@@ -1,0 +1,21 @@
+<h3>{{viewTitle}}</h3>
+
+<form action="/movie" method="POST" autocomplete="off">
+<input type="hidden" name="_id" value="{{ movie._id }}">
+<div class="form-group">
+    <label>Title</label>
+    <input type="text" class="form-control" name="title" placeholder="Title" value="{{movie.title}}">
+</div>
+<div class="form-group">
+    <label>Director</label>
+    <input type="text" class="form-control" name="director" placeholder="Director" value="{{movie.director}}">
+</div>
+<div class="form-group">
+    <label>Release Date</label>
+    <input type="text" class="form-control" name="release_date" placeholder="Release Date" value="{{movie.release_date}}">
+</div>
+<div class="form-group">
+    <button type="submit" class="btn btn-info">Submit</button>
+    <a class="btn btn-secondary" href="/movie/list">View All</a>
+</div>
+</form>
