@@ -9,12 +9,14 @@ const exphbs = require('express-handlebars')
 const {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access')
 const bodyparser = require('body-parser')
 
+const authController = require("./controllers/authController")
+const userController = require("./controllers/userController")
 const movieController = require("./controllers/movieController")
 
 const app = express()
 app.use(bodyparser.json())
 app.use(bodyparser.urlencoded({ extended: true }))
-// const port = 3000
+const port = 3000
 
 // let movies = [
 //     {
@@ -58,8 +60,9 @@ app.use(bodyparser.urlencoded({ extended: true }))
 
 app.get("/", (req, res)=>{
     res.send(
-        `<h2>Welcome to the Movies Database!!<h2/>
-        <h3>Click here to get access to the <b><a href="/movie/list">Database</a></b></h3>`
+        `<h2>Welcome to the Database!!<h2/>
+        <h3>Click here to get access to the <b><a href="/movie/list">Database Movies</a></b></h3><br/></br></br>
+        <h3>Click here to get access to the <b><a href="/user/list">Database Users</a></b></h3>`
     )
 })
 
@@ -146,6 +149,8 @@ app.set('view engine', 'hbs')
 //     }
 // })
 
-app.listen(3000, () => console.log(`Server mendengarkan pada port 3000`))
+app.listen(port, () => console.log(`Server melayu ning port ${port}`))
 
+// app.use("/auth", authController)
+app.use("/user", userController)
 app.use("/movie", movieController)

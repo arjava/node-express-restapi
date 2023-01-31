@@ -13,3 +13,4 @@ err => {
 })
 
 require('./movie.model')
+require('./user.model')
