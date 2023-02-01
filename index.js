@@ -59,6 +59,10 @@ const port = 3000
 // }
 
 app.get("/", (req, res)=>{
+    res.redirect('/auth/login')
+})
+
+app.get("/home", (req, res)=>{
     res.send(
         `<h2>Welcome to the Database!!<h2/>
         <h3>Click here to get access to the <b><a href="/movie/list">Database Movies</a></b></h3><br/></br></br>
@@ -151,6 +155,6 @@ app.set('view engine', 'hbs')
 
 app.listen(port, () => console.log(`Server melayu ning port ${port}`))
 
-// app.use("/auth", authController)
+app.use("/auth", authController)
 app.use("/user", userController)
 app.use("/movie", movieController)
