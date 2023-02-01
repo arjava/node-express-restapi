@@ -6,8 +6,10 @@ const jwt = require('jsonwebtoken')
 const path = require('path')
 const handleBars = require('handlebars')
 const exphbs = require('express-handlebars')
-const {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access')
+const { allowInsecurePrototypeAccess } = require('@handlebars/allow-prototype-access')
 const bodyparser = require('body-parser')
+const cookieParser = require("cookie-parser")
+let session = require('express-session')
 
 const authController = require("./controllers/authController")
 const userController = require("./controllers/userController")
@@ -17,6 +19,20 @@ const app = express()
 app.use(bodyparser.json())
 app.use(bodyparser.urlencoded({ extended: true }))
 const port = 3000
+const oneDay = 1000 * 60 * 60 * 24
+app.listen(port, () => console.log(`Server melayu ning port ${port}`))
+app.use(session({
+    secret: randomUUID(),
+    saveUninitialized: true,
+    cookie: { maxAge: oneDay },
+    resave: false
+}))
+app.use(express.static(__dirname))
+app.use(cookieParser())
+
+app.use("/auth", authController)
+app.use("/user", userController)
+app.use("/movie", movieController)
 
 // let movies = [
 //     {
@@ -58,16 +74,48 @@ const port = 3000
 //     }
 // }
 
-app.get("/", (req, res)=>{
-    res.redirect('/auth/login')
+app.get("/", (req, res) => {
+    session = req.session
+    if (session.userid) {
+        res.redirect('/home')
+    } else {
+        res.redirect('/auth/login')
+    }
 })
 
-app.get("/home", (req, res)=>{
-    res.send(
-        `<h2>Welcome to the Database!!<h2/>
-        <h3>Click here to get access to the <b><a href="/movie/list">Database Movies</a></b></h3><br/></br></br>
-        <h3>Click here to get access to the <b><a href="/user/list">Database Users</a></b></h3>`
-    )
+app.get("/logout", (req, res) => {
+    console.log("LOGOUTED")
+    req.session.destroy()
+    res.redirect("/")
+})
+
+app.get("/home", (req, res) => {
+    // jwt.verify(req.token, "arjavKey", (err, authData) => {
+    // if (err) {
+    // res.sendStatus(403)
+    // console.log("Oro duwe akses iroku")
+    // res.redirect("auth/login")
+    // } else {
+    // movies.push(movie)
+    // res.json({ msg: "Movie is added to the list", user: movie })
+    //     res.send(
+    //         `<h2>Welcome to the Database!!<h2/>
+    //         <h3>Click here to get access to the <b><a href="/movie/list">Database Movies</a></b></h3><br/></br></br>
+    //         <h3>Click here to get access to the <b><a href="/user/list">Database Users</a></b></h3>`
+    //     )
+    // }
+    // })
+    session = req.session
+    if (session.userid) {
+        res.send(
+            `<h2>Welcome to the Database!!<h2/>
+            <h3>Click here to get access to the <b><a href="/movie/list">Database Movies</a></b></h3><br/></br></br>
+            <h3>Click here to get access to the <b><a href="/user/list">Database Users</a></b></h3><br/></br></br>
+            <h3>Click here to <b><a href="/logout">Logout</a></b></h3>`
+        )
+    } else {
+        res.redirect("auth/login")
+    }
 })
 
 app.set('views', path.join(__dirname, '/views/'))
@@ -152,9 +200,3 @@ app.set('view engine', 'hbs')
 //         })
 //     }
 // })
-
-app.listen(port, () => console.log(`Server melayu ning port ${port}`))
-
-app.use("/auth", authController)
-app.use("/user", userController)
-app.use("/movie", movieController)

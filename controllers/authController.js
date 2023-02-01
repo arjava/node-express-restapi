@@ -3,28 +3,33 @@ const bcrypt = require('bcrypt')
 var router = express.Router()
 const mongoose = require('mongoose')
 const Auth = mongoose.model('Auth')
+const jwt = require('jsonwebtoken')
+let session = require('express-session')
 
 function hashPassword(req, res) {
     console.log("PASSWORD ", req.password)
     console.log("USERNAME ", req.username)
     bcrypt.hash(req.password, 11)
-    .then(hash => {
-        console.log("HASH ", hash)
-        insertRecord(req, res, hash)
-    })
-    .catch(err => {
-        console.log("Error Hashing password " + err)
-    })
+        .then(hash => {
+            console.log("HASH ", hash)
+            insertRecord(req, res, hash)
+        })
+        .catch(err => {
+            console.log("Error Hashing password " + err)
+        })
 }
 
-function comparePassword(password, hash, res) {
-    console.log('PASS : '+password+'& HASH :'+hash)
-    bcrypt.compare(password, hash)
+function comparePassword(req, hash, res) {
+    bcrypt.compare(req.body.password, hash)
         .then(result => {
             console.log("RESULT ", result)
-            if(result){
+            if (result) {
+                session=req.session
+                session.userid=req.body.username
+                console.log(req.session)
                 res.redirect("/home")
-                return
+            }else {
+                res.send("Wrong Password or Email")
             }
         })
         .catch(err => {
@@ -47,24 +52,28 @@ function insertRecord(req, res, hash) {
     })
 }
 
-router.get("/login", (req, res)=>{
+router.get("/login", (req, res) => {
     res.render('auth/login', {
         viewTitle: "Login User"
     })
 })
 
 router.post("/login", (req, res) => {
-    Auth.find({username: req.body.username}, (err, doc) => {
+    Auth.find({ username: req.body.username }, (err, doc) => {
         console.log("DOC ", doc)
         if (!err) {
-            comparePassword(req.body.password, doc[0].password, res)
+            // jwt.sign({ auth: doc }, "arjavKey", (err, token) => {
+                // res.json({ token: token })
+            //     console.log("TOKEN : "+token)
+            // })
+            comparePassword(req, doc[0].password, res)
         } else {
             res.send("Ops durung ano data kuen ng kene.")
         }
     })
 })
 
-router.get("/register", (req, res)=>{
+router.get("/register", (req, res) => {
     res.render('auth/register', {
         viewTitle: "Register User"
     })
